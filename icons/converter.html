@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>ממיר SVG ל-PNG עבור PWA</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; padding: 40px; background: #f4f4f9; }
+        .card { background: white; padding: 20px; border-radius: 12px; display: inline-block; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        button { background: #6200ee; color: white; border: none; padding: 10px 20px; margin: 10px; font-size: 16px; border-radius: 6px; cursor: pointer; font-weight: bold;}
+        button:hover { background: #4b00b7; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h2>מחולל אייקונים ל-PWA 🚀</h2>
+        <p>לחץ על הכפתורים כדי להוריד את קבצי ה-PNG בגדלים המתאימים:</p>
+        
+        <button onclick="convertToPng(180, 'apple-icon-180.png')">הורד גודל 180x180 (iOS)</button><br>
+        <button onclick="convertToPng(192, 'icon-192.png')">הורד גודל 192x192 (Android)</button><br>
+        <button onclick="convertToPng(512, 'icon-512.png')">הורד גודל 512x512 (Splash)</button>
+    </div>
+
+    <div id="svg-container" style="display: none;">
+        <svg id="source-svg" width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="256" cy="256" r="256" fill="#6200ee"/>
+            <text x="50%" y="50%" text-anchor="middle" dy=".35em" fill="white" font-family="Arial, sans-serif" font-size="280" font-weight="bold">H</text>
+        </svg>
+    </div>
+
+    <script>
+        function convertToPng(size, filename) {
+            const svgElement = document.getElementById('source-svg');
+            const svgString = new XMLSerializer().serializeToString(svgElement);
+            
+            // יצירת תמונה זמנית בזיכרון
+            const img = new Image();
+            const svgBlob = new Blob([svgString], {type: 'image/svg+xml;charset=utf-8'});
+            const URL = window.URL || window.webkitURL || window;
+            const blobURL = URL.createObjectURL(svgBlob);
+            
+            img.onload = function() {
+                // יצירת קנבס בגודל המבוקש
+                const canvas = document.createElement('canvas');
+                canvas.width = size;
+                canvas.height = size;
+                const ctx = canvas.getContext('2d');
+                
+                // ציור ה-SVG על גבי הקנבס בגודל החדש
+                ctx.drawImage(img, 0, 0, size, size);
+                
+                // המרה ל-PNG והורדה
+                const pngURL = canvas.toDataURL('image/png');
+                const downloadLink = document.createElement('a');
+                downloadLink.href = pngURL;
+                downloadLink.download = filename;
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                document.body.removeChild(downloadLink);
+            };
+            
+            img.src = blobURL;
+        }
+    </script>
+</body>
+</html>
