@@ -11,6 +11,20 @@ const ASSETS_TO_CACHE = [
     './icons/icon-512.png'
 ];
 
+
 self.addEventListener('install', (event) => {
-    // ... (שאר הקוד נשאר ללא שינוי)
+    event.waitUntil(
+        caches.open(CACHE_NAME).then((cache) => {
+            return cache.addAll(ASSETS_TO_CACHE);
+        })
+    );
+});
+
+// שלב התפיסה (Fetch) - אם אין אינטרנט, המכשיר יקח את הקבצים מהמטמון המקומי
+self.addEventListener('fetch', (event) => {
+    event.respondWith(
+        caches.match(event.request).then((response) => {
+            return response || fetch(event.request);
+        })
+    );
 });
